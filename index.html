@@ -6,17 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Podio Form with UTM Tracking</title>
   <style>
-    /* Hide UTM input fields by name */
-    input[name="utm_source"],
-    input[name="utm_medium"],
-    input[name="utm_campaign"] {
-      display: none !important;
-    }
-
-    /* Hide their containers too (in case labels or divs are around them) */
-    input[name="utm_source"] ~ *,
-    input[name="utm_medium"] ~ *,
-    input[name="utm_campaign"] ~ * {
+    /* Oculta los contenedores de los campos UTM */
+    [data-id="utmsource"],
+    [data-id="utmmedium"],
+    [data-id="utmcampaign"] {
       display: none !important;
     }
   </style>
@@ -40,25 +33,29 @@
   <script>
     window.addEventListener('load', function () {
       const urlParams = new URLSearchParams(window.location.search);
-      const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign'];
+      const utmMap = {
+        utmsource: 'fields[utmsource]',
+        utmmedium: 'fields[utmmedium]',
+        utmcampaign: 'fields[utmcampaign]',
+      };
 
       const tryFillFields = () => {
-        let allFilled = true;
-        utmKeys.forEach(key => {
-          const input = document.querySelector(`input[name="${key}"]`);
-          if (input) {
-            input.value = urlParams.get(key) || '';
-            input.style.display = 'none';
-            if (input.parentElement) {
-              input.parentElement.style.display = 'none';
-            }
-          } else {
-            allFilled = false;
-          }
-        });
+        let allPresent = true;
 
-        if (!allFilled) {
-          setTimeout(tryFillFields, 500); // Retry in case form hasn't fully loaded
+        for (const key in utmMap) {
+          const fieldName = utmMap[key];
+          const value = urlParams.get(key) || '';
+          const textarea = document.querySelector(`textarea[name="${fieldName}"]`);
+
+          if (textarea) {
+            textarea.value = value;
+          } else {
+            allPresent = false;
+          }
+        }
+
+        if (!allPresent) {
+          setTimeout(tryFillFields, 500); // Esperar a que el formulario cargue
         }
       };
 
